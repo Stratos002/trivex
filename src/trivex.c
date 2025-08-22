@@ -32,14 +32,12 @@ void TVX_GrowingArray_addElement(struct TVX_GrowingArray* pGrowingArray, void* p
 {
 	if(pGrowingArray->elementCount == pGrowingArray->capacity)
 	{
-		void* pTmpData = malloc(pGrowingArray->capacity * 2 * pGrowingArray->elementSize);
-		memcpy(pTmpData, pGrowingArray->pData, pGrowingArray->elementSize * pGrowingArray->elementCount);
-		free(pGrowingArray->pData);
+		void* pTmpData = realloc(pGrowingArray->pData, pGrowingArray->capacity * 2 * pGrowingArray->elementSize);
 		pGrowingArray->pData = pTmpData;
 		pGrowingArray->capacity *= 2;
 	}
 
-	memcpy((char*)pGrowingArray->pData + pGrowingArray->elementSize * pGrowingArray->elementCount, pElement, pGrowingArray->elementSize);
+	memcpy((uint8_t*)pGrowingArray->pData + pGrowingArray->elementSize * pGrowingArray->elementCount, pElement, pGrowingArray->elementSize);
 	pGrowingArray->elementCount += 1;
 }
 
@@ -107,12 +105,12 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 		else if(strncmp(line, "f", 1) == 0)
 		{
 			struct TVX_VertexSignature currentVertexSignatures[3];
-			memset(currentVertexSignatures, UINT32_MAX, sizeof(currentVertexSignatures));
+			memset(currentVertexSignatures, -1, sizeof(currentVertexSignatures));
 			
 			// case : v/vt/vn
 			if(pMesh->vertexAttributeFlags == (TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION | TVX_VERTEX_ATTRIBUTE_FLAG_BIT_NORMAL | TVX_VERTEX_ATTRIBUTE_FLAG_BIT_UV))
 			{
-				sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", 
+				sscanf(line, "f %u/%u/%u %u/%u/%u %u/%u/%u", 
 					&currentVertexSignatures[0].positionIndex, &currentVertexSignatures[0].UVIndex, &currentVertexSignatures[0].normalIndex, 
 					&currentVertexSignatures[1].positionIndex, &currentVertexSignatures[1].UVIndex, &currentVertexSignatures[1].normalIndex, 
 					&currentVertexSignatures[2].positionIndex, &currentVertexSignatures[2].UVIndex, &currentVertexSignatures[2].normalIndex);
@@ -120,7 +118,7 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 			// case : v//vn
 			else if(pMesh->vertexAttributeFlags == (TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION | TVX_VERTEX_ATTRIBUTE_FLAG_BIT_NORMAL))
 			{
-				sscanf(line, "f %d//%d %d//%d %d//%d", 
+				sscanf(line, "f %u//%u %u//%u %u//%u", 
 					&currentVertexSignatures[0].positionIndex, &currentVertexSignatures[0].normalIndex, 
 					&currentVertexSignatures[1].positionIndex, &currentVertexSignatures[1].normalIndex, 
 					&currentVertexSignatures[2].positionIndex, &currentVertexSignatures[2].normalIndex);
@@ -128,7 +126,7 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 			// case : v/vt
 			else if(pMesh->vertexAttributeFlags == (TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION | TVX_VERTEX_ATTRIBUTE_FLAG_BIT_UV))
 			{
-				sscanf(line, "f %d/%d %d/%d %d/%d", 
+				sscanf(line, "f %u/%u %u/%u %u/%u", 
 					&currentVertexSignatures[0].positionIndex, &currentVertexSignatures[0].UVIndex, 
 					&currentVertexSignatures[1].positionIndex, &currentVertexSignatures[1].UVIndex, 
 					&currentVertexSignatures[2].positionIndex, &currentVertexSignatures[2].UVIndex);
@@ -136,7 +134,7 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 			// case : v
 			else if(pMesh->vertexAttributeFlags == (TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION))
 			{
-				sscanf(line, "f %d %d %d", 
+				sscanf(line, "f %u %u %u", 
 					&currentVertexSignatures[0].positionIndex, 
 					&currentVertexSignatures[1].positionIndex, 
 					&currentVertexSignatures[2].positionIndex);
@@ -161,11 +159,8 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 
 				if(!vertexSignatureAlreadyEncountered)
 				{
-					// fetcher les valeurs d'attributs en fonction du mask
-					// construire le vertex, l'ajouter
-					// ajouter un index
-
 					struct TVX_Vertex vertex;
+					memset(&vertex, 0, sizeof(struct TVX_Vertex));
 
 					if((pMesh->vertexAttributeFlags & TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION) != 0)
 					{
@@ -205,7 +200,7 @@ enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh)
 	return TVX_RESULT_SUCCESS;
 }
 
-void TVX_freeMesh(struct TVX_Mesh mesh)
+void TVX_destroyMesh(struct TVX_Mesh mesh)
 {
 	free(mesh.pVertices);
 	free(mesh.pVertexIndices);

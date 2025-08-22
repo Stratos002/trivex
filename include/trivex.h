@@ -60,7 +60,7 @@ struct TVX_Mesh
 };
 
 enum TVX_Result TVX_loadMeshFromOBJ(const char* pPath, struct TVX_Mesh* pMesh);
-void TVX_freeMesh(struct TVX_Mesh mesh);
+void TVX_destroyMesh(struct TVX_Mesh mesh);
 
 #ifdef __cplusplus
 }
