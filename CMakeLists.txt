@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME trivex)
 project(${PROJECT_NAME})
 
-# C89
-set(CMAKE_C_STANDARD 89)
+# C99
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # sources

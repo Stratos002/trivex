@@ -14,15 +14,6 @@ enum TVX_Result
 	TVX_RESULT_COULD_NOT_OPEN_FILE
 };
 
-enum TVX_VertexAttributeFlagBit
-{
-	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION = 0,
-	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_NORMAL = 1,
-	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_UV = 2
-};
-
-typedef uint8_t TVX_VertexAttributeFlags;
-
 struct TVX_Position
 {
 	float x;
@@ -42,14 +33,28 @@ struct TVX_UV
 	float U;
 	float V;
 };
- 
+
+struct TVX_Vertex
+{
+	struct TVX_Position position;
+	struct TVX_Normal normal;
+	struct TVX_UV UV;
+};
+
+enum TVX_VertexAttributeFlagBit
+{
+	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_POSITION = (1 << 0),
+	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_NORMAL = (1 << 1),
+	TVX_VERTEX_ATTRIBUTE_FLAG_BIT_UV = (1 << 2)
+};
+
+typedef uint8_t TVX_VertexAttributeFlags;
+
 struct TVX_Mesh
 {
 	TVX_VertexAttributeFlags vertexAttributeFlags;
 	uint32_t vertexCount;
-	struct TVX_Position* pPositions;
-	struct TVX_Normal* pNormals;
-	struct TVX_UV* pUVs;
+	struct TVX_Vertex* pVertices;
 	uint32_t vertexIndexCount;
 	uint32_t* pVertexIndices;
 };
